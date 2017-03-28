@@ -29,8 +29,7 @@
 
 # Load pickled data
 import pickle
-
-# TODO: Fill this in based on where you saved the training and testing data
+from sklearn.model_selection import train_test_split
 
 training_file = "./traffic-signs-data/train.p"
 validation_file="./traffic-signs-data/valid.p"
@@ -46,6 +45,8 @@ with open(testing_file, mode='rb') as f:
 X_train, y_train = train['features'], train['labels']
 X_valid, y_valid = valid['features'], valid['labels']
 X_test, y_test = test['features'], test['labels']
+
+X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
 # <markdowncell>
 # 
@@ -68,19 +69,15 @@ X_test, y_test = test['features'], test['labels']
 ### Use python, pandas or numpy methods rather than hard coding the results
 import numpy as np
 
-# TODO: Number of training examples
 n_train = X_train.shape[0]
-
-# TODO: Number of testing examples.
+n_valid = X_valid.shape[0]
 n_test = X_test.shape[0]
-
-# TODO: What's the shape of an traffic sign image?
 image_shape = X_train.shape[1:]
 
-# TODO: How many unique classes/labels there are in the dataset.
 n_classes = np.unique(y_train).shape[0]
 
 print("Number of training examples =", n_train)
+print("Number of validation examples =", n_valid)
 print("Number of testing examples =", n_test)
 print("Image data shape =", image_shape)
 print("Number of classes =", n_classes)
@@ -95,16 +92,14 @@ print("Number of classes =", n_classes)
 # 
 # **NOTE:** It's recommended you start with something simple first. If you wish to do more, come back to it after you've completed the rest of the sections.
 # <codecell>
-
-### Data exploration visualization code goes here.
-### Feel free to use as many code cells as needed.
+import numpy as np
 import matplotlib.pyplot as plt
+import random 
+
 # Visualizations will be shown in the notebook.
 get_ipython().magic('matplotlib inline')
 
-#print(y_train[index])
-
-grid_len = 8
+grid_len = 4
 
 plt.figure(figsize=(grid_len,grid_len))
  
@@ -114,7 +109,28 @@ for i in range(1,grid_len*grid_len+1):
    
     plt.subplot(grid_len,grid_len,i)
     plt.imshow(image)
-     
+    
+# histograms of the data
+plt.figure(figsize = (16,3))
+plt.subplot(131)
+n, bins, patches = plt.hist(y_train, n_classes, facecolor='green', alpha=0.75)
+plt.xlabel('Labels')
+plt.ylabel('No. of samples')
+plt.title('Histogram of training samples')
+
+plt.subplot(132)
+n, bins, patches = plt.hist(y_valid, n_classes, facecolor='green', alpha=0.75)
+plt.xlabel('Labels')
+plt.ylabel('No. of samples')
+plt.title('Histogram of validation samples')
+
+plt.subplot(133)
+n, bins, patches = plt.hist(y_test, n_classes, facecolor='green', alpha=0.75)
+plt.xlabel('Labels')
+plt.ylabel('No. of samples')
+plt.title('Histogram of test samples')
+plt.show()
+
 # <markdowncell>
 # ## Step 2: Design and Test a Model Architecture
 # 
@@ -137,17 +153,17 @@ for i in range(1,grid_len*grid_len+1):
 # <markdowncell>
 # Use the code cell (or multiple code cells, if necessary) to implement the first step of your project.
 # <codecell>
+### Preprocess the data here. Preprocessing steps could include normalization, converting to grayscale, etc.
 
 from sklearn.utils import shuffle
 
 X_train, y_train = shuffle(X_train, y_train)
 
-### Preprocess the data here. Preprocessing steps could include normalization, converting to grayscale, etc.
-### Feel free to use as many code cells as needed.
 
 
+# <markdowncell>
 # ### Model Architecture
-
+# <codecell>
 
     
 import tensorflow as tf
@@ -267,7 +283,7 @@ with tf.Session() as sess:
             batch_x, batch_y = X_train[offset:end], y_train[offset:end]
             sess.run(training_operation, feed_dict={x: batch_x, y: batch_y})
             
-        validation_accuracy = evaluate(X_test, y_test)
+        validation_accuracy = evaluate(X_valid, y_valid)
         print("EPOCH {} ...".format(i+1))
         print("Validation Accuracy = {:.3f}".format(validation_accuracy))
         print()
@@ -293,8 +309,6 @@ with tf.Session() as sess:
 # <markdowncell> 
 # ### Load and Output the Images
 # <codecell> 
-
-
     
 ### Load the images and plot them here.
 ### Feel free to use as many code cells as needed.

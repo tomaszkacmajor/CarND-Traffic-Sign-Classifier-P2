@@ -5,3 +5,6 @@ models
 *.swp
 *.p
 traffic-signs-data
+*.data-00000-of-00001
+*.index
+*.meta
