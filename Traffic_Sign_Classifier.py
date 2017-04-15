@@ -8,19 +8,6 @@
 # 
 # ## Project: Build a Traffic Sign Recognition Classifier
 # 
-# In this notebook, a template is provided for you to implement your functionality in stages, which is required to successfully complete this project. If additional code is required that cannot be included in the notebook, be sure that the Python code is successfully imported and included in your submission if necessary. 
-# 
-# > **Note**: Once you have completed all of the code implementations, you need to finalize your work by exporting the iPython Notebook as an HTML document. Before exporting the notebook to html, all of the code cells need to have been run so that reviewers can see the final implementation and output. You can then export the notebook by using the menu above and navigating to  \n",
-#     "**File -> Download as -> HTML (.html)**. Include the finished document along with this notebook as your submission. 
-# 
-# In addition to implementing code, there is a writeup to complete. The writeup should be completed in a separate file, which can be either a markdown file or a pdf document. There is a [write up template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) that can be used to guide the writing process. Completing the code template and writeup template will cover all of the [rubric points](https://review.udacity.com/#!/rubrics/481/view) for this project.
-# 
-# The [rubric](https://review.udacity.com/#!/rubrics/481/view) contains "Stand Out Suggestions" for enhancing the project beyond the minimum requirements. The stand out suggestions are optional. If you decide to pursue the "stand out suggestions", you can include the code in this Ipython notebook and also discuss the results in the writeup file.
-# 
-# 
-# >**Note:** Code and Markdown cells can be executed using the **Shift + Enter** keyboard shortcut. In addition, Markdown cells can be edited by typically double-clicking the cell to enter edit mode.
-#
-#
 # <markdowncell>
 #
 # ## Step 0: Load The Data
@@ -29,7 +16,6 @@
 
 # Load pickled data
 import pickle
-from sklearn.model_selection import train_test_split
 
 training_file = "./traffic-signs-data/train.p"
 validation_file="./traffic-signs-data/valid.p"
@@ -46,10 +32,7 @@ X_train, y_train = train['features'], train['labels']
 X_valid, y_valid = valid['features'], valid['labels']
 X_test, y_test = test['features'], test['labels']
 
-X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
-
 # <markdowncell>
-# 
 # ## Step 1: Dataset Summary & Exploration
 # 
 # The pickled data is a dictionary with 4 key/value pairs:
@@ -59,14 +42,12 @@ X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_siz
 # - `'sizes'` is a list containing tuples, (width, height) representing the original width and height the image.
 # - `'coords'` is a list containing tuples, (x1, y1, x2, y2) representing coordinates of a bounding box around the sign in the image. **THESE COORDINATES ASSUME THE ORIGINAL IMAGE. THE PICKLED DATA CONTAINS RESIZED VERSIONS (32 by 32) OF THESE IMAGES**
 # 
-# Complete the basic data summary below. Use python, numpy and/or pandas methods to calculate the data summary rather than hard coding the results. For example, the [pandas shape method](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.shape.html) might be useful for calculating some of the summary results. 
 
 # <markdowncell>
 # ### Provide a Basic Summary of the Data Set Using Python, Numpy and/or Pandas
+
 # <codecell>
 
-### Replace each question mark with the appropriate value. 
-### Use python, pandas or numpy methods rather than hard coding the results
 import numpy as np
 
 n_train = X_train.shape[0]
@@ -84,14 +65,9 @@ print("Number of classes =", n_classes)
 
 # <markdowncell>
 # ### Include an exploratory visualization of the dataset
-#
-# <markdowncell>
-# Visualize the German Traffic Signs Dataset using the pickled file(s). This is open ended, suggestions include: plotting traffic sign images, plotting the count of each sign, etc.
-# 
-# The [Matplotlib](http://matplotlib.org/) [examples](http://matplotlib.org/examples/index.html) and [gallery](http://matplotlib.org/gallery.html) pages are a great resource for doing visualizations in Python.
-# 
-# **NOTE:** It's recommended you start with something simple first. If you wish to do more, come back to it after you've completed the rest of the sections.
+
 # <codecell>
+
 import numpy as np
 import matplotlib.pyplot as plt
 import random 
@@ -99,95 +75,199 @@ import random
 # Visualizations will be shown in the notebook.
 get_ipython().magic('matplotlib inline')
 
-grid_len = 4
-
-plt.figure(figsize=(grid_len,grid_len))
+def draw_images_examples(image_array, grid_x, grid_y, title):
+    fig = plt.figure(figsize=(grid_x,grid_y))
+    fig.suptitle(title, fontsize=20)
  
-for i in range(1,grid_len*grid_len+1):
-    index = random.randint(0, len(X_train))
-    image = X_train[index].squeeze()
-   
-    plt.subplot(grid_len,grid_len,i)
-    plt.imshow(image)
+    for i in range(1,grid_y*grid_x+1):
+        index = random.randint(0, len(image_array))
+        image = image_array[index].squeeze()
+       
+        plt.subplot(grid_y,grid_x,i)
+        plt.imshow(image)
+        
+draw_images_examples(X_train, 16, 4, 'Examples of images from training set')
     
-# histograms of the data
-plt.figure(figsize = (16,3))
-plt.subplot(131)
-n, bins, patches = plt.hist(y_train, n_classes, facecolor='green', alpha=0.75)
+
+fig = plt.figure(figsize=(12,4))
+n, bins, patches = plt.hist(y_train, n_classes)
 plt.xlabel('Labels')
 plt.ylabel('No. of samples')
 plt.title('Histogram of training samples')
 
-plt.subplot(132)
-n, bins, patches = plt.hist(y_valid, n_classes, facecolor='green', alpha=0.75)
-plt.xlabel('Labels')
-plt.ylabel('No. of samples')
-plt.title('Histogram of validation samples')
-
-plt.subplot(133)
-n, bins, patches = plt.hist(y_test, n_classes, facecolor='green', alpha=0.75)
-plt.xlabel('Labels')
-plt.ylabel('No. of samples')
-plt.title('Histogram of test samples')
-plt.show()
+X_train_one_label = X_train[np.where(y_train==0)]
+draw_images_examples(X_train_one_label, 16, 4, 'Examples of images of the same type - Speed limit (20km/h)')
 
 # <markdowncell>
 # ## Step 2: Design and Test a Model Architecture
-# 
-# Design and implement a deep learning model that learns to recognize traffic signs. Train and test your model on the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset).
-# 
-# The LeNet-5 implementation shown in the [classroom](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/6df7ae49-c61c-4bb2-a23e-6527e69209ec/lessons/601ae704-1035-4287-8b11-e2c2716217ad/concepts/d4aca031-508f-4e0b-b493-e7b706120f81) at the end of the CNN lesson is a solid starting point. You'll have to change the number of classes and possibly the preprocessing, but aside from that it's plug and play! 
-# 
-# With the LeNet-5 solution from the lecture, you should expect a validation set accuracy of about 0.89. To meet specifications, the validation set accuracy will need to be at least 0.93. It is possible to get an even higher accuracy, but 0.93 is the minimum for a successful project submission. 
-# 
-# There are various aspects to consider when thinking about this problem:
-# 
-# - Neural network architecture (is the network over or underfitting?)
-# - Play around preprocessing techniques (normalization, rgb to grayscale, etc)
-# - Number of examples per label (some have more than others).
-# - Generate fake data.
-# 
-# Here is an example of a [published baseline model on this problem](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf). It's not required to be familiar with the approach used in the paper but, it's good practice to try to read papers like these.
 # <markdowncell>
-# ### Pre-process the Data Set (normalization, grayscale, etc.)
-# <markdowncell>
-# Use the code cell (or multiple code cells, if necessary) to implement the first step of your project.
-# <codecell>
-### Preprocess the data here. Preprocessing steps could include normalization, converting to grayscale, etc.
+# ### Equalize histograms of training samples - by generation of additional, transformed images
 
-from sklearn.utils import shuffle
-
-X_train, y_train = shuffle(X_train, y_train)
-
-
-
-# <markdowncell>
-# ### Model Architecture
 # <codecell>
 
+from tqdm import tqdm
+from scipy import ndimage
+import cv2 
+
+def augment_brightness_camera_images(image):
+    image1 = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+    random_bright = .25+np.random.uniform()
+    image1[:,:,2] = image1[:,:,2]*random_bright
+    image1 = cv2.cvtColor(image1,cv2.COLOR_HSV2RGB)
+    return image1
+
+def transform_image(img,ang_range,shear_range,trans_range):    
+    ang_rot = np.random.uniform(ang_range)-ang_range/2
+    rows,cols,ch = img.shape    
+    Rot_M = cv2.getRotationMatrix2D((cols/2,rows/2),ang_rot,1)
+        
+    img = cv2.warpAffine(img,Rot_M,(cols,rows))    
+    img = augment_brightness_camera_images(img)
     
+    return img
+
+def get_random_image_of_given_label(images_set, labels_set, label):
+    image_indexes = np.where(labels_set == label)
+    rand_index = random.randint(0, np.bincount(labels_set)[label] - 1)
+    return images_set[image_indexes][rand_index]
+
+def equalize_samples_set(X_set, y_set):
+    labels_count_arr = np.bincount(y_set)
+    labels_bins = np.arange(len(labels_count_arr))
+    
+    ind = 0    
+   
+    for label in tqdm(labels_bins):        
+        labels_no_to_add =  int(np.mean(labels_count_arr)) * 4 - labels_count_arr[label]
+        
+        ind = ind + 1
+        X_temp = []
+        y_temp = []
+        
+        for num in range(labels_no_to_add):      
+            rand_image = get_random_image_of_given_label(X_set, y_set, label)
+            X_temp.append(transform_image(rand_image, 20,10,5))
+            y_temp.append(label)            
+   
+        X_set = np.append(X_set, np.array(X_temp), axis=0)
+        y_set = np.append(y_set, np.array(y_temp), axis=0)
+        
+    return X_set, y_set
+
+
+X_train, y_train = equalize_samples_set(X_train, y_train)
+
+n, bins, patches = plt.hist(y_train, n_classes)
+plt.xlabel('Labels')
+plt.ylabel('No. of samples')
+plt.title('Equalized histogram of train samples')
+plt.show()
+
+print("Train set increased from {} to {}".format(n_train,X_train.shape[0]))
+
+
+plt.imshow(X_train[1000])
+
+grid_len = 4
+plt.figure(figsize=(grid_len,grid_len))
+ 
+for i in range(1,grid_len*grid_len+1):
+    image = transform_image(X_train[1000], 20,10,5)
+    plt.subplot(grid_len,grid_len,i)
+    plt.imshow(image)
+
+
+# <markdowncell>
+
+### Preprocess the data here. Preprocessing steps could include normalization, converting to grayscale, etc.
+# <codecell>
+import cv2
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
-EPOCHS = 2
+def grayscale(img):    
+    return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)[:,:,None]
+
+def convert2YUV(img):    
+    return cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+
+def normalize(value):
+    return value / 255 * 2 - 1
+
+def preprocess_image(image):
+    img = grayscale(image)
+    img = normalize(img)
+    return img
+
+
+from tqdm import tqdm
+def preprocess_batch(images):
+    imgs = np.zeros(shape=images.shape)
+    processed_image_depth = preprocess_image(images[0]).shape[2]
+    imgs = imgs[:,:,:,0:processed_image_depth]
+    for i in tqdm(range(images.shape[0])):
+        imgs[i] = preprocess_image(images[i])        
+    return imgs
+
+X_train_processed = preprocess_batch(X_train)
+X_valid_processed = preprocess_batch(X_valid)
+X_test_processed = preprocess_batch(X_test)
+
+sample_image = X_train[1000]
+sample_image_processed = grayscale(X_train[1000])
+plt.figure(figsize=(16,3))
+plt.subplot(131)
+plt.imshow(sample_image)
+plt.subplot(132)
+plt.imshow(sample_image_processed.squeeze(), cmap='gray')
+
+print("Sample image dimension BEFORE processing: {}".format(sample_image.shape))
+print("Sample image dimension AFTER processing: {}".format(sample_image_processed.shape))
+
+image_depth = X_train_processed.shape[3]
+
+dim1 = sample_image.shape[0]
+dim2 = sample_image.shape[1]
+dim3 = sample_image.shape[2]
+sample_image_reshaped = np.reshape(sample_image, dim1*dim2*dim3)
+plt.figure(figsize=(16,3))
+plt.subplot(131)
+n, bins, patches = plt.hist(sample_image_reshaped, 255)
+
+sample_image_processed =X_train_processed[1000]
+dim1 = sample_image_processed.shape[0]
+dim2 = sample_image_processed.shape[1]
+dim3 = sample_image_processed.shape[2]
+sample_image_processed_reshaped = np.reshape(sample_image_processed, dim1*dim2*dim3)
+plt.subplot(132)
+n, bins, patches = plt.hist(sample_image_processed_reshaped,255)
+
+# <markdowncell>
+# ### Model Architecture
+
+# <codecell>
+
+import tensorflow as tf
+from tensorflow.contrib.layers import flatten
+
+EPOCHS = 5
 BATCH_SIZE = 128
 
-
-def LeNet(x):    
+def LeNet(x):
     # Arguments used for tf.truncated_normal, randomly defines variables for the weights and biases for each layer
     mu = 0
     sigma = 0.1
     
     # SOLUTION: Layer 1: Convolutional. Input = 32x32x1. Output = 28x28x6.
-    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 3, 6), mean = mu, stddev = sigma))
+    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, image_depth, 6), mean = mu, stddev = sigma))
     conv1_b = tf.Variable(tf.zeros(6))
     conv1   = tf.nn.conv2d(x, conv1_W, strides=[1, 1, 1, 1], padding='VALID') + conv1_b
 
     # SOLUTION: Activation.
     conv1 = tf.nn.relu(conv1)
-
+    
     # SOLUTION: Pooling. Input = 28x28x6. Output = 14x14x6.
-    conv1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
+    conv1 = tf.nn.avg_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
 
     # SOLUTION: Layer 2: Convolutional. Output = 10x10x16.
     conv2_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 6, 16), mean = mu, stddev = sigma))
@@ -196,9 +276,9 @@ def LeNet(x):
     
     # SOLUTION: Activation.
     conv2 = tf.nn.relu(conv2)
-
+        
     # SOLUTION: Pooling. Input = 10x10x16. Output = 5x5x16.
-    conv2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
+    conv2 = tf.nn.avg_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
 
     # SOLUTION: Flatten. Input = 5x5x16. Output = 400.
     fc0   = flatten(conv2)
@@ -210,7 +290,7 @@ def LeNet(x):
     
     # SOLUTION: Activation.
     fc1    = tf.nn.relu(fc1)
-
+    
     # SOLUTION: Layer 4: Fully Connected. Input = 120. Output = 84.
     fc2_W  = tf.Variable(tf.truncated_normal(shape=(120, 84), mean = mu, stddev = sigma))
     fc2_b  = tf.Variable(tf.zeros(84))
@@ -218,7 +298,7 @@ def LeNet(x):
     
     # SOLUTION: Activation.
     fc2    = tf.nn.relu(fc2)
-
+    
     # SOLUTION: Layer 5: Fully Connected. Input = 84. Output = 10.
     fc3_W  = tf.Variable(tf.truncated_normal(shape=(84, n_classes), mean = mu, stddev = sigma))
     fc3_b  = tf.Variable(tf.zeros(n_classes))
@@ -227,15 +307,20 @@ def LeNet(x):
     return logits
 
 
-x = tf.placeholder(tf.float32, (None, 32, 32, 3))
+x = tf.placeholder(tf.float32, (None, 32, 32, image_depth))
 y = tf.placeholder(tf.int32, (None))
 one_hot_y = tf.one_hot(y, n_classes)
 
-rate = 0.001
+rate = 0.003
 
 logits = LeNet(x)
+
+varss = tf.trainable_variables() 
+lossL2 = tf.add_n([ tf.nn.l2_loss(v) for v in varss
+                    if '_b' not in v.name ]) * 0.0001
+
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
-loss_operation = tf.reduce_mean(cross_entropy)
+loss_operation = tf.reduce_mean(cross_entropy) + lossL2
 optimizer = tf.train.AdamOptimizer(learning_rate = rate)
 training_operation = optimizer.minimize(loss_operation)
 
@@ -260,33 +345,29 @@ def evaluate(X_data, y_data):
 # <markdowncell>
 # A validation set can be used to assess how well the model is performing. A low accuracy on the training and validation
 # sets imply underfitting. A high accuracy on the training set but low accuracy on the validation set implies overfitting.
+
 # <codecell>
+from sklearn.utils import shuffle
 
-
-### Train your model here.
-### Calculate and report the accuracy on the training and validation set.
-### Once a final model architecture is selected, 
-### the accuracy on the test set should be calculated and reported as well.
-### Feel free to use as many code cells as needed.
-
+cost_arr = []
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    num_examples = len(X_train)
+    num_examples = len(X_train_processed)
     
     print("Training...")
     print()
     for i in range(EPOCHS):
-        X_train, y_train = shuffle(X_train, y_train)
+        X_train_processed, y_train = shuffle(X_train_processed, y_train)
         for offset in range(0, num_examples, BATCH_SIZE):
             end = offset + BATCH_SIZE
-            batch_x, batch_y = X_train[offset:end], y_train[offset:end]
-            sess.run(training_operation, feed_dict={x: batch_x, y: batch_y})
+            batch_x, batch_y = X_train_processed[offset:end], y_train[offset:end]
+            to, cost = sess.run([training_operation, loss_operation], feed_dict={x: batch_x, y: batch_y})
             
-        validation_accuracy = evaluate(X_valid, y_valid)
-        print("EPOCH {} ...".format(i+1))
-        print("Validation Accuracy = {:.3f}".format(validation_accuracy))
-        print()
+        validation_accuracy = evaluate(X_valid_processed, y_valid)
+        print("EPOCH; {}; Valid.Acc.; {:.3f}; Loss; {:.5f}".format(i+1, validation_accuracy, cost))
+        cost_arr.append(cost)
+      
         
     saver.save(sess, './lenet')
     print("Model saved")
@@ -295,164 +376,113 @@ with tf.Session() as sess:
 with tf.Session() as sess:
     saver.restore(sess, tf.train.latest_checkpoint('.'))
 
-    test_accuracy = evaluate(X_test, y_test)
+    test_accuracy = evaluate(X_test_processed, y_test)
     print("Test Accuracy = {:.3f}".format(test_accuracy))
     
+plt.plot(cost_arr)
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.show()
 
-# <markdowncell> 
+# <markdowncell>
 # ## Step 3: Test a Model on New Images
 # 
 # To give yourself more insight into how your model is working, download at least five pictures of German traffic signs from the web and use your model to predict the traffic sign type.
 # 
-# You may find `signnames.csv` useful as it contains mappings from the class id (integer) to the actual sign name.
-#
-# <markdowncell> 
+# <markdowncell>
 # ### Load and Output the Images
-# <codecell> 
+
+# <codecell>
+import matplotlib.pyplot as plt
+import os
+import matplotlib.image as mpimg
+
+img_folder = './examples/'
+test_images = []
+test_responses = [1, 22, 18, 38, 17, 23]
+fig = plt.figure(figsize=(6,1))
+fig.suptitle('Test images from the web', fontsize=10)
+
+
+cnt = 0
+for img_name in os.listdir(img_folder):
+    image = mpimg.imread(img_folder+img_name)
+    image = cv2.resize(image, (32, 32), interpolation = cv2.INTER_AREA)
+    cnt = cnt+1
+    plt.subplot(1,6,cnt)
+    plt.imshow(image)
+    image = preprocess_image(image) 
+    test_images.append(image)
     
-### Load the images and plot them here.
-### Feel free to use as many code cells as needed.
-
-plt.figure(figsize=(1,1))
-plt.imshow(X_test[1])
-print(y_test[1])
-
-plt.figure(figsize=(1,1))
-plt.imshow(X_test[2])
-print(y_test[3])
-
-with tf.Session() as sess:
-     saver.restore(sess, tf.train.latest_checkpoint('.'))
- #    y = LeNet(X_test[1:3])
-     argmax = sess.run( tf.argmax(logits, 1), feed_dict={x:  X_test[1:3], y: y_test[1:3]})
-     pred = sess.run(correct_prediction, feed_dict={x:  X_test[1:3], y: y_test[1:3]})
-     
-     print(argmax)
-     print(pred)
-   #  sess.run( logits, feed_dict={x: X_test[1:3]})
+    
+test_images = np.array(test_images)
    
 
-# <markdowncell> 
+# <markdowncell>
 # ### Predict the Sign Type for Each Image
-# <codecell> 
 
-### Run the predictions here and use the model to output the prediction for each image.
-### Make sure to pre-process the images with the same pre-processing pipeline used earlier.
-### Feel free to use as many code cells as needed.
+# <codecell>
+   
+pred_val = tf.argmax(logits, 1)
+pred_softmax = tf.nn.softmax(logits)
+pred_topFive = tf.nn.top_k(pred_softmax, k=5)
+    
+with tf.Session() as sess:
+    saver.restore(sess, tf.train.latest_checkpoint('.'))
+    pred_val_out, pred_topFive_out = sess.run( [pred_val, pred_topFive], feed_dict={x:  test_images, y: test_responses})
+    
+print("Predicted Labels")
+print(pred_val_out)
+print()
 
 
-# <markdowncell> 
+with open('signnames.csv') as csvfile:
+    next(csvfile) # ignore header
+    a = [ row.strip().split(',') for row in csvfile]
+    signnames_dict = dict((data[0],data[1:]) for data in a)
+    
+cnt = 0
+correct_cnt = 0
+for i in pred_val_out:
+    correctness = "Correct"
+    if test_responses[cnt] == i:
+        correctness = "Correct"
+        correct_cnt = correct_cnt + 1
+    else:
+        correctness = "Not correct!"
+      
+    print("{} - {} -> {}".format(i, signnames_dict[str(i)], correctness))
+    cnt = cnt + 1
+    
+# <markdowncell>
 # ### Analyze Performance
-# <codecell> 
+
+# <codecell>
 
 ### Calculate the accuracy for these 5 new images. 
 ### For example, if the model predicted 1 out of 5 signs correctly, it's 20% accurate on these new images.
-
-# <markdowncell> 
-# ### Output Top 5 Softmax Probabilities For Each Image Found on the Web
-# <markdowncell> 
-# For each of the new images, print out the model's softmax probabilities to show the **certainty** of the model's predictions (limit the output to the top 5 probabilities for each image). [`tf.nn.top_k`](https://www.tensorflow.org/versions/r0.12/api_docs/python/nn.html#top_k) could prove helpful here. 
-# 
-# The example below demonstrates how tf.nn.top_k can be used to find the top k predictions for each image.
-# 
-# `tf.nn.top_k` will return the values and indices (class ids) of the top k predictions. So if k=3, for each sign, it'll return the 3 largest probabilities (out of a possible 43) and the correspoding class ids.
-# 
-# Take this numpy array as an example. The values in the array represent predictions. The array contains softmax probabilities for five candidate images with six possible classes. `tk.nn.top_k` is used to choose the three classes with the highest probability:
-# 
-# ```
-# # (5, 6) array
-# a = np.array([[ 0.24879643,  0.07032244,  0.12641572,  0.34763842,  0.07893497,
-#          0.12789202],
-#        [ 0.28086119,  0.27569815,  0.08594638,  0.0178669 ,  0.18063401,
-#          0.15899337],
-#        [ 0.26076848,  0.23664738,  0.08020603,  0.07001922,  0.1134371 ,
-#          0.23892179],
-#        [ 0.11943333,  0.29198961,  0.02605103,  0.26234032,  0.1351348 ,
-#          0.16505091],
-#        [ 0.09561176,  0.34396535,  0.0643941 ,  0.16240774,  0.24206137,
-#          0.09155967]])
-# ```
-# 
-# Running it through `sess.run(tf.nn.top_k(tf.constant(a), k=3))` produces:
-# 
-# ```
-# TopKV2(values=array([[ 0.34763842,  0.24879643,  0.12789202],
-#        [ 0.28086119,  0.27569815,  0.18063401],
-#        [ 0.26076848,  0.23892179,  0.23664738],
-#        [ 0.29198961,  0.26234032,  0.16505091],
-#        [ 0.34396535,  0.24206137,  0.16240774]]), indices=array([[3, 0, 5],
-#        [0, 1, 4],
-#        [0, 5, 1],
-#        [1, 3, 5],
-#        [1, 4, 3]], dtype=int32))
-# ```
-# 
-# Looking just at the first row we get `[ 0.34763842,  0.24879643,  0.12789202]`, you can confirm these are the 3 largest probabilities in `a`. You'll also notice `[3, 0, 5]` are the corresponding indices.
-# <codecell> 
-### Print out the top five softmax probabilities for the predictions on the German traffic sign images found on the web. 
-### Feel free to use as many code cells as needed.
-
-# <markdowncell> 
  
-# ## Step 4: Visualize the Neural Network's State with Test Images
-# 
-#  This Section is not required to complete but acts as an additional excersise for understaning the output of a neural network's weights. While neural networks can be a great learning device they are often referred to as a black box. We can understand what the weights of a neural network look like better by plotting their feature maps. After successfully training your neural network you can see what it's feature maps look like by plotting the output of the network's weight layers in response to a test stimuli image. From these plotted feature maps, it's possible to see what characteristics of an image the network finds interesting. For a sign, maybe the inner network feature maps react with high activation to the sign's boundary outline or to the contrast in the sign's painted symbol.
-# 
-#  Provided for you below is the function code that allows you to get the visualization output of any tensorflow weight layer you want. The inputs to the function should be a stimuli image, one used during training or a new one you provided, and then the tensorflow variable name that represents the layer's state during the training process, for instance if you wanted to see what the [LeNet lab's](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/6df7ae49-c61c-4bb2-a23e-6527e69209ec/lessons/601ae704-1035-4287-8b11-e2c2716217ad/concepts/d4aca031-508f-4e0b-b493-e7b706120f81) feature maps looked like for it's second convolutional layer you could enter conv2 as the tf_activation variable.
-# 
-# For an example of what feature map outputs look like, check out NVIDIA's results in their paper [End-to-End Deep Learning for Self-Driving Cars](https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/) in the section Visualization of internal CNN State. NVIDIA was able to show that their network's inner weights had high activations to road boundary lines by comparing feature maps from an image with a clear path to one without. Try experimenting with a similar test to show that your trained network's weights are looking for interesting features, whether it's looking at differences in feature maps from images with or without a sign, or even what feature maps look like in a trained network vs a completely untrained one on the same sign image.
-# 
-# <figure>
-#  <img src="visualize_cnn.png" width="380" alt="Combined Image" />
-#  <figcaption>
-#  <p></p> 
-#  <p style="text-align: center;"> Your output should look something like this (above)</p> 
-#  </figcaption>
-# </figure>
-#  <p></p> 
-# <codecell> 
+print("Accuracy for the tested images equals: {:.2f} %".format(correct_cnt/cnt*100)) 
 
+# <markdowncell>
+# ### Output Top 5 Softmax Probabilities For Each Image Found on the Web
 
-### Visualize your network's feature maps here.
-### Feel free to use as many code cells as needed.
+# <codecell>
+print('Top 5 softmax probabilities for fach test image')
+print(pred_topFive_out)
 
-# image_input: the test image being fed into the network to produce the feature maps
-# tf_activation: should be a tf variable name used during your training procedure that represents the calculated state of a specific weight layer
-# activation_min/max: can be used to view the activation contrast in more detail, by default matplot sets min and max to the actual min and max values of the output
-# plt_num: used to plot out multiple different weight feature map sets on the same block, just extend the plt number for each new feature map entry
+top_k_values = pred_topFive_out[0]
+top_k_indices = pred_topFive_out[1]
 
-def outputFeatureMap(image_input, tf_activation, activation_min=-1, activation_max=-1 ,plt_num=1):
-    # Here make sure to preprocess your image_input in a way your network expects
-    # with size, normalization, ect if needed
-    # image_input =
-    # Note: x should be the same name as your network's tensorflow data placeholder variable
-    # If you get an error tf_activation is not defined it maybe having trouble accessing the variable from inside a function
-    activation = tf_activation.eval(session=sess,feed_dict={x : image_input})
-    featuremaps = activation.shape[3]
-    plt.figure(plt_num, figsize=(15,15))
-    for featuremap in range(featuremaps):
-        plt.subplot(6,8, featuremap+1) # sets the number of feature maps to show on each row and column
-        plt.title('FeatureMap ' + str(featuremap)) # displays the feature map number
-        if activation_min != -1 & activation_max != -1:
-            plt.imshow(activation[0,:,:, featuremap], interpolation="nearest", vmin =activation_min, vmax=activation_max, cmap="gray")
-        elif activation_max != -1:
-            plt.imshow(activation[0,:,:, featuremap], interpolation="nearest", vmax=activation_max, cmap="gray")
-        elif activation_min !=-1:
-            plt.imshow(activation[0,:,:, featuremap], interpolation="nearest", vmin=activation_min, cmap="gray")
-        else:
-            plt.imshow(activation[0,:,:, featuremap], interpolation="nearest", cmap="gray")
+ind = np.arange(5) 
 
-# <markdowncell> 
-# ### Question 9
-# <markdowncell> 
-# Discuss how you used the visual output of your trained network's feature maps to show that it had learned to look for interesting characteristics in traffic sign images
-# 
-#
-# **Answer:**
-#
-# > **Note**: Once you have completed all of the code implementations and successfully answered each question above, you may finalize your work by exporting the iPython Notebook as an HTML document. You can do this by using the menu above and navigating to  \n",
-#     "**File -> Download as -> HTML (.html)**. Include the finished document along with this notebook as your submission.
-#
-# ### Project Writeup
-# 
-# Once you have completed the code implementation, document your results in a project writeup using this [template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) as a guide. The writeup can be in a markdown or pdf file. 
+for i in range(6):
+    plt.figure(figsize=(4,2))
+    values = top_k_values[i]
+    plt.bar(ind, values, 0.2, color='b')
+    plt.ylabel('Softmax probability')
+    plt.xlabel('Labels')
+    plt.title('Top 5 Softmax Probabilities for Test Image {}'.format(str(i+1)))
+    plt.xticks(ind, tuple(top_k_indices[i]))
+
+plt.show()
