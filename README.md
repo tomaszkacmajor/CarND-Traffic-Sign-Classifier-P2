@@ -114,3 +114,9 @@ For all 6 images the final model was very certain about its result. Only for the
 For the rest of images the model was more than 99%b sure about its prediction.</br></br>
 
 <img src="./readme_resources/Softmmax2.png"><img src="./readme_resources/Softmmax3.png"><img src="./readme_resources/Softmmax4.png"><img src="./readme_resources/Softmmax5.png"><img src="./readme_resources/Softmmax6.png">
+
+
+*Some parts of the code were inspired by following projects:*<br/>
+https://github.com/MWransky/traffic-signs<br/>
+https://github.com/hkorre/traffic-signs<br/>
+https://github.com/mvirgo/Traffic-Sign-Classifier<br/>
