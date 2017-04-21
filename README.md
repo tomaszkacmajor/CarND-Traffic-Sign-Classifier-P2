@@ -77,7 +77,7 @@ My final model results were:
 - Test set accuracy of <b>94.6 %</b>
 
 Below, there are details of intermediate steps that I took and the corresponding validation accuracies after 20 epochs of training:
-Sometimes the differences between 2 given approaches seemm to be huge but note that for each training procedure there is random weight initialization which influences the final error, especially when number of epochs is small. That's why during final model tuning I used more than 20 epochs - about 100.
+Sometimes the differences between 2 given approaches seem to be huge but note that for each training procedure there is random weight initialization which influences the final error, especially when number of epochs is small. That's why during final model tuning I used more than 20 epochs - about 100.
 - Initial LeNet model, choosing input images color representation - 91 %
 - Input images normalization - ~91 %
 - Training set augmantation - 93 %
@@ -91,7 +91,7 @@ Here are five German traffic signs that I found on the web:
 
 <img src="./readme_resources/ImagesFromWeb.png"></br></br>
 
-It wasn't easy to find examples which are of bad quality and could be a problem for the classifier. Most of the new found images are clear and I expected that the model should work properly for most of them. I noticed when the accuracy on the test set was about 90 % (before final model tuning) at least one of the new images shown here was wrongly classified. When test set accuracy went to the final 94.6 % all 6 new images were classified perfectly. 
+It wasn't easy to find examples which are of bad quality and could be a problem for the classifier. Most of the new found images are clear and I expected that the model should work properly for most of them. I noticed that when the accuracy on the test set was about 90% (before final model tuning) at least one of the new images shown here was wrongly classified. When test set accuracy went to the final 94.6% all 6 new images were classified perfectly. 
 
 Here are the results of the prediction:
 
@@ -108,7 +108,7 @@ The model was able to correctly guess 6 of the 6 traffic signs, which gives an a
 
 The code for making predictions on my final model is located in the 9th cell of the Ipython notebook.
 
-For all 6 images the final model was very certain about it's result. Only for the first sign (Speed limit 30km/h) the model was "only" 94% certain about the output. The second and third guess were also other speed limit signs. </br></br>
+For all 6 images the final model was very certain about its result. Only for the first sign (Speed limit 30km/h) the model was "only" 94% certain about the output. The second and third guess for this sign were other speed limit signs. </br></br>
 <img src="./readme_resources/Softmmax1.png"></br></br>
 
 For the rest of images the model was more than 99%b sure about its prediction.</br></br>
