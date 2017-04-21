@@ -34,15 +34,15 @@ Below, there are some examples of new images generation. </br></br>
 <img src="./readme_resources/TestImageToTransform.png"> <img src="./readme_resources/TestImagesAfterTransformation.png"></br></br>
 The new training data set has been increased from 34799 to 139148 samples. The validation and test set remained untouched. 
 
-As a next step, I decided to convert the images to grayscale because it makes 3 times less the data which strongly influences on the training time. In addition, it has been shown in this [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) describing analogous problem that such operation helps in obtaining better results. 
-I also normalized the image data to be between -1 and 1. It prevents from the numerical unstabilities which can ocuur when the data resides far away from zero. 
+As a next step, I decided to convert the images to grayscale because it makes 3 times less the data which strongly influences on the training time. In addition, it has been shown in this [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) describing analogous problem that such operation helps in obtaining better results. At an early stage of my model architecture I trained the model for 20 epochs for RGB, YUV and Grey-scale and the latest one gave the best results. 
+I also normalized the image data to be between -1 and 1. It prevents from the numerical unstabilities which can ocuur when the data resides far away from zero. Some other normalizations like 0.1-1.0 didn't change much in the final accuracy.
 
 Here is an example of a traffic sign image before and after grayscaling and normalization. Below, the histograms of both images are depicted. </br></br>
 <img src="./readme_resources/Grayscaling.png"></br></br>
 <img src="./readme_resources/HistogramAfterGreyAndNorm.png"></br></br>
 
 ### Design and Test a Model Architecture
-My final model architecture is the [LeNet](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf) convolutional neural network which has been proved to work on many similar problems. 
+My final model architecture is the [LeNet](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf) convolutional neural network which proved to work on many similar problems, especially for image classification. The model consists of two convolution layers and three fully connected layers. Average pooling was used. 
 
 The model consisted of the following layers:
 
@@ -59,44 +59,39 @@ The model consisted of the following layers:
 | RELU					|		
 | Fully connected		| inputs 120, outputs 84        									|
 | RELU					|		
-| Fully connected		| inputs 84, outputs 10        									|
+| Fully connected		| inputs 84, outputs 43        									|
 | Softmax				|        									|
 
-To train the model, I used an Adam Optimizer. The batch size is 128 and number of epochs equals 200. Initial learning rate was set on 0.003. L2 loss function was added to the main loss for the regularization with the weight 0.0001.
+To train the model, I used the Adam Optimizer. The batch size was 128 and number of epochs equaled 200. Initial learning rate was set on 0.003. L2 loss function was added to the main loss for the regularization with the weight 0.0001.
 
-I 
+I followed an iterative process of finding the best model architecture. I changed one of the parameters or tried one architecture modification, ran 20 epochs and obsesrved the validation error. For each hyperparameters, i.e. learning rate and L2 loss function, I tried to find the optimum value. During such process I tried dropout technique but it didn't help to achieve better accuracy. Pooling type also did't influence the model much. 
 
-####4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
+It's worth to mention that using the same iterative process I played with preprocessing techniques much. I found that for this case the grey-scale images are optimum inputs for the model. Also image training set augmentation really helped with random image transformations (only changing rotation and brightness).
+
+From the initial LeNet model taken from the Udacity course which was designed for MNIST problem I improved the model from 90% to 96.8% validation accuracy. I was mainly looking at this parameter instead of learning accuracy to prevent overfitting. 
 
 My final model results were:
 
-training set accuracy of 99.5 %
-validation set accuracy of 96.8 %
-test set accuracy of 94.6 %
+- Training set accuracy of <b>99.5 %</b>
+- Validation set accuracy of <b>96.8 %</b>
+- Test set accuracy of <b>94.6 %</b>
 
-If an iterative approach was chosen:
+Below, there are details of intermediate steps that I took and the corresponding validation accuracies after 20 epochs of training:
+Sometimes the differences between 2 given approaches seemm to be huge but note that for each training procedure there is random weight initialization which influences the final error, especially when number of epochs is small. That's why during final model tuning I used more than 20 epochs - about 100.
+- Initial LeNet model, choosing input images color representation - 91 %
+- Input images normalization - ~91 %
+- Training set augmantation - 93 %
+- Learn rate optimization, from this stage I tested for more epochs (100) - 95 %
+- Finding optimum image transformations during training set augmentation - 96 %
+- Trying different pool methods, trying dropout, choosing L2 loss, tuning learn rate again - 96.8
 
-What was the first architecture that was tried and why was it chosen?
-What were some problems with the initial architecture?
-How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-Which parameters were tuned? How were they adjusted and why?
-What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
-If a well known architecture was chosen:
-
-What architecture was chosen?
-Why did you believe it would be relevant to the traffic sign application?
-How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
-###Test a Model on New Images
-
-####1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+### Test a Model on New Images
 
 Here are five German traffic signs that I found on the web:
 
 <img src="./readme_resources/ImagesFromWeb.png"></br></br>
 
-The first image might be difficult to classify because ...
-
-####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+It wasn't easy to find examples which are of bad quality and could be a problem for the classifier. Most of the new found images are clear and I expected that the model should work properly for most of them. I noticed when the accuracy on the test set was about 90 % (before final model tuning) at least one of the new images shown here was wrongly classified. When test set accuracy went to the final 94.6 % all 6 new images were classified perfectly. 
 
 Here are the results of the prediction:
 
@@ -109,19 +104,13 @@ Here are the results of the prediction:
 | No entry			| No entry     							|
 | Slippery road			| Slippery road    							|
 
-
 The model was able to correctly guess 6 of the 6 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set of 94.6%.
 
-####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
+The code for making predictions on my final model is located in the 9th cell of the Ipython notebook.
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
+For all 6 images the final model was very certain about it's result. Only for the first sign (Speed limit 30km/h) the model was "only" 94% certain about the output. The second and third guess were also other speed limit signs. </br></br>
+<img src="./readme_resources/Softmmax1.png"></br></br>
 
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For the rest of images the model was more than 99%b sure about its prediction.</br></br>
 
-Probability	Prediction
-.60	Stop sign
-.20	U-turn
-.05	Yield
-.04	Bumpy Road
-.01	Slippery Road
-For the second image ...
+<img src="./readme_resources/Softmmax2.png"><img src="./readme_resources/Softmmax3.png"><img src="./readme_resources/Softmmax4.png"><img src="./readme_resources/Softmmax5.png"><img src="./readme_resources/Softmmax6.png">
